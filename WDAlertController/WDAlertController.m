@@ -134,8 +134,8 @@
 
 - (void)addBottomLine {
     _bottomLine = [[UIView alloc] init];
-    [self.backScroll addSubview:_topLine];
-    [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+    [self.backScroll addSubview:_bottomLine];
+    [_bottomLine mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.height.offset(0.1);
         make.top.equalTo(self.tempView.mas_bottom).offset(20);
     }];
@@ -152,7 +152,7 @@
 }
 
 - (void)addTitleLabel {
-    if (self.titleText.length == self.attributeTitle.length == 0) {
+    if (self.titleText.length == 0 && self.attributeTitle.length == 0) {
         return;
     }
     
@@ -176,7 +176,7 @@
 }
 
 - (void)addContent {
-    if (self.contentText.length == self.attributeContent.length == 0) {
+    if (self.contentText.length == 0 && self.attributeContent.length == 0) {
         return;
     }
     
@@ -194,7 +194,6 @@
         make.right.offset(-15);
         make.top.equalTo(self.tempView.mas_bottom).offset(20);
         make.height.offset(contentHeight);
-        make.bottom.offset(0);
     }];
     _tempView = _content;
 }
@@ -371,7 +370,7 @@
     WDCustomPresentationController *present = [[WDCustomPresentationController alloc] initWithPresentedViewController:presented presentingViewController:source];
     present.constrainBlock = ^(MASConstraintMaker * _Nonnull make) {
         make.center.offset(0);
-        make.width.offset(295);
+        make.width.offset(WD_SCREEN_WIDTH * .7);
         make.height.offset(self->_height);
     };
     present.dimViewAlpha = .2;
