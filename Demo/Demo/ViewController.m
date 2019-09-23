@@ -29,10 +29,10 @@
         make.edges.offset(0);
     }];
     
-    self.dataArr = @[@"普通标题，普通内容",@"富文本标题，富文本内容",@"有标题，无内容",@"无标题，有内容",@"系统Alert"];
+    self.dataArr = @[@"普通标题，普通内容",@"富文本标题，富文本内容",@"有标题，无内容",@"无标题，有内容"];
 }
 
-# pragma mark ================== tableView delegate / datasource ======================
+# pragma mark - tableView delegate  datasource 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.dataArr.count;
 }
@@ -75,7 +75,7 @@
 //普通标题，普通内容
 - (void)showType1 {
     
-    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancel:YES];
+    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancelAction:YES];
     
     [alert show];
 }
@@ -95,13 +95,13 @@
 
 //有标题，无内容
 - (void)showType3 {
-    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:nil actionName:@"好听" ActionHandle:nil cancel:YES];
+    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:nil actionName:@"好听" ActionHandle:nil cancelAction:YES];
     [alert show];
 }
 
 //无标题，有内容
 - (void)showType4 {
-    WDAlertController *alert = [WDAlertController alertWithTitle:nil content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancel:YES];
+    WDAlertController *alert = [WDAlertController alertWithTitle:nil content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancelAction:YES];
     
     [alert show];
 }

@@ -20,6 +20,7 @@
 
 /* Begin PBXFileReference section */
 		448260B9667B8375266A7984 /* Pods-Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.release.xcconfig"; path = "Target Support Files/Pods-Demo/Pods-Demo.release.xcconfig"; sourceTree = "<group>"; };
+		4F92C85623389C4B002BD120 /* WDHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WDHeader.h; sourceTree = "<group>"; };
 		4F9A221423349B4700D713DA /* WDAlertController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WDAlertController.m; sourceTree = "<group>"; };
 		4F9A221523349B4700D713DA /* WDCustomPresentationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WDCustomPresentationController.m; sourceTree = "<group>"; };
 		4F9A221623349B4700D713DA /* WDAlertController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDAlertController.h; sourceTree = "<group>"; };
@@ -66,6 +67,7 @@
 				4F9A221423349B4700D713DA /* WDAlertController.m */,
 				4F9A221723349B4700D713DA /* WDCustomPresentationController.h */,
 				4F9A221523349B4700D713DA /* WDCustomPresentationController.m */,
+				4F92C85623389C4B002BD120 /* WDHeader.h */,
 			);
 			name = WDAlertController;
 			path = ../../WDAlertController;
@@ -385,6 +387,7 @@
 					"\"$(SRCROOT)/../WDAlertController\"",
 				);
 				INFOPLIST_FILE = Demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -409,6 +412,7 @@
 					"\"$(SRCROOT)/../WDAlertController\"",
 				);
 				INFOPLIST_FILE = Demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

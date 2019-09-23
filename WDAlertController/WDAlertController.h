@@ -58,7 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat contentLineSpace;
 
 + (instancetype)alertWithTitle:(nullable NSString *)title content:(nullable NSString *)content actions:(NSArray <WDAlertAction *>*)actions;
-+ (instancetype)alertWithTitle:(nullable NSString *)title content:(nullable NSString *)content actionName:(NSString *)actionName ActionHandle:(nullable void(^)(WDAlertAction *action))handler cancel:(BOOL)showCancel;
++ (instancetype)alertWithTitle:(nullable NSString *)title content:(nullable NSString *)content actionName:(NSString *)actionName ActionHandle:(nullable void(^)(WDAlertAction *action))handler cancelAction:(BOOL)showCancel;
 - (void)addAction:(WDAlertAction *)action;
 - (void)addActionWithTitle:(NSString *)title handler:(nullable void(^)(WDAlertAction *action))handler;
 

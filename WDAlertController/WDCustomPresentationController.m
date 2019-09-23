@@ -1,9 +1,9 @@
 //
 //  WDCustomPresentationController.m
-//  DLAlertController
+//  WDAlertController
 //
-//  Created by 董雷 on 2019/9/18.
-//  Copyright © 2019 董雷. All rights reserved.
+//  Created by donglei on 2019/9/18.
+//  Copyright © 2019 donglei. All rights reserved.
 //
 
 #import "WDCustomPresentationController.h"

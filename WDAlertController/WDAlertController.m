@@ -8,19 +8,30 @@
 
 #import "WDAlertController.h"
 #import "WDCustomPresentationController.h"
+#import "WDHeader.h"
 @interface WDAlertController ()<UIViewControllerTransitioningDelegate,UITextViewDelegate,UIViewControllerAnimatedTransitioning,CALayerDelegate>
 
+//scrollView的content高度
 @property (nonatomic, assign) CGFloat height;
-@property (nonatomic, strong) UILabel *titleLabel;
-@property (nonatomic, strong) UITextView *content;
-@property (nonatomic, strong) NSMutableArray *actions;
 
+//UI控件
+@property (nonatomic, strong) UIScrollView *backScroll;     //底层scroll
+@property (nonatomic, strong) UIView *topLine;              //scrollView最上面的控件，高度为0，用于作为第一个tempView
+@property (nonatomic, strong) UIView *bottomLine;           //scrollView最下面的控件, 高度为0，用于作为最后一个控件
+@property (nonatomic, strong) UILabel *titleLabel;          //标题label
+@property (nonatomic, strong) UITextView *content;          //内容Label
+@property (nonatomic, strong) NSMutableArray *actions;      //按钮集合
+
+@property (nonatomic, strong) UIView *tempView;
+
+//content中富文本的Link点击事件
 @property (nonatomic, copy) void(^contentHandler)(NSString *url,NSRange range);
 
 @end
 
 @implementation WDAlertController
 
+# pragma mark - 构造方法
 + (instancetype)alertWithTitle:(NSString *)title content:(NSString *)content actions:(NSArray <WDAlertAction *>*)actions {
     WDAlertController *alert = [[WDAlertController alloc] init];
     alert.titleText = title;
@@ -29,7 +40,7 @@
     return alert;
 }
 
-+ (instancetype)alertWithTitle:(NSString *)title content:(NSString *)content actionName:(NSString *)actionName ActionHandle:(void(^)(WDAlertAction *action))handler cancel:(BOOL)showCancel{
++ (instancetype)alertWithTitle:(NSString *)title content:(NSString *)content actionName:(NSString *)actionName ActionHandle:(void(^)(WDAlertAction *action))handler cancelAction:(BOOL)showCancel{
     WDAlertController *alert = [[WDAlertController alloc] init];
     alert.titleText = title;
     alert.contentText = content;
@@ -43,8 +54,7 @@
     return alert;
 }
 
-- (instancetype)init
-{
+- (instancetype)init {
     self = [super init];
     if (self) {
         self.titleFont = [UIFont fontWithName:@"PingFangSC-Semibold" size:18];
@@ -53,11 +63,11 @@
         self.contentLineSpace = 5;
         self.modalPresentationStyle = UIModalPresentationCustom;
         self.transitioningDelegate = self;
-        
     }
     return self;
 }
 
+# pragma mark - show
 - (void)show {
     [self presentVc:self];
 }
@@ -94,59 +104,110 @@
     }
 }
 
+# pragma mark - viewDidLoad
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     
-    //****************** title ******************
-    UILabel *title = [[UILabel alloc] init];
-    title.textAlignment = NSTextAlignmentCenter;
-    title.textColor = [UIColor colorWithRed:17/255.0 green:17/255.0 blue:17/255.0 alpha:1];
-    if (self.titleText) title.text = _titleText;
-    if (self.titleFont) title.font = _titleFont;
-    if (self.attributeTitle)  title.attributedText = _attributeTitle;
-    if (self.titleColor) title.textColor = _titleColor;
+    [self addBackScroll];
+    [self addTopLine];
+    [self addTitleLabel];
+    [self addContent];
+    [self addBottomLine];
     
-    CGFloat titleHeight = [title sizeThatFits:CGSizeMake(260, 100)].height + 45;
-    if (title.text.length == 0 && title.attributedText.length == 0) {
-        titleHeight = 25;
+    
+    [self layoutActions];   //添加按钮
+    [self updateHeight];
+}
+
+# pragma mark - 懒加载
+
+- (void)addTopLine {
+    _topLine = [[UIView alloc] init];
+    [self.backScroll addSubview:_topLine];
+    [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.height.offset(0.1);
+        make.width.offset(WD_SCREEN_WIDTH * .7);
+    }];
+    _tempView = _topLine;
+}
+
+- (void)addBottomLine {
+    _bottomLine = [[UIView alloc] init];
+    [self.backScroll addSubview:_topLine];
+    [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.height.offset(0.1);
+        make.top.equalTo(self.tempView.mas_bottom).offset(20);
+    }];
+}
+
+- (void)addBackScroll {
+    _backScroll = [[UIScrollView alloc] init];
+    _backScroll.bounces = NO;
+    [self.view addSubview:_backScroll];
+    [_backScroll mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.offset(0);
+        make.bottom.offset(-55);
+    }];
+}
+
+- (void)addTitleLabel {
+    if (self.titleText.length == self.attributeTitle.length == 0) {
+        return;
     }
-    [self.view addSubview:title];
-    [title mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.offset(0);
+    
+    _titleLabel = [[UILabel alloc] init];
+    _titleLabel.textAlignment = NSTextAlignmentCenter;
+    _titleLabel.textColor = WD_color_gray(17);
+    if (self.titleText) _titleLabel.text = _titleText;
+    if (self.titleFont) _titleLabel.font = _titleFont;
+    if (self.attributeTitle)  _titleLabel.attributedText = _attributeTitle;
+    if (self.titleColor) _titleLabel.textColor = _titleColor;
+    
+    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH *.7, MAXFLOAT)].height;
+    [self.backScroll addSubview:_titleLabel];
+    [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.offset(15);
+        make.right.offset(-15);
         make.height.offset(titleHeight);
-        make.top.offset(0);
-        make.width.offset(260);
+        make.top.equalTo(self.tempView.mas_bottom).offset(20);
     }];
-    
-    //****************** content ******************
-    UITextView *content = [[UITextView alloc] init];
-    content.delegate = self;
-    content.editable = NO;
-    if (self.contentText) content.text = _contentText;
-    if (self.contentFont) content.font = _contentFont;
-    if (self.attributeContent)  content.attributedText = _attributeContent;
-    
-    CGFloat contentHeight = [content sizeThatFits:CGSizeMake(260, 400)].height + 25;
-    if (content.text.length == 0 && content.attributedText.length == 0) {
-        contentHeight = 0;
+    _tempView = _titleLabel;
+}
+
+- (void)addContent {
+    if (self.contentText.length == self.attributeContent.length == 0) {
+        return;
     }
-    [self.view addSubview:content];
-    [content mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.offset(0);
-        make.top.equalTo(title.mas_bottom).offset(0);
-        make.height.offset(contentHeight);
-        make.width.offset(260);
-    }];
     
+    _content = [[UITextView alloc] init];
+    _content.delegate = self;
+    _content.editable = NO;
+    if (self.contentText) _content.text = _contentText;
+    if (self.contentFont) _content.font = _contentFont;
+    if (self.attributeContent)  _content.attributedText = _attributeContent;
+    
+    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7, MAXFLOAT)].height;
+    [self.backScroll addSubview:_content];
+    [_content mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.offset(15);
+        make.right.offset(-15);
+        make.top.equalTo(self.tempView.mas_bottom).offset(20);
+        make.height.offset(contentHeight);
+        make.bottom.offset(0);
+    }];
+    _tempView = _content;
+}
+
+//设置actions按钮
+- (void)layoutActions {
     //***************** 按钮 *******************
     UIView *backView = [[UIView alloc] init];
-    backView.backgroundColor = [UIColor colorWithRed:221/255.0 green:221/255.0 blue:221/255.0 alpha:1];
+    backView.backgroundColor = WD_color_gray(221);
     [self.view addSubview:backView];
     [backView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.offset(0);
-        make.top.equalTo(content.mas_bottom);
-        make.height.offset(55).priority(500);
+        make.top.equalTo(self.backScroll.mas_bottom);
     }];
     
     if (self.actions.count == 0) {
@@ -170,11 +231,6 @@
         }];
         [actionBtnArr mas_distributeViewsAlongAxis:MASAxisTypeHorizontal withFixedSpacing:1 leadSpacing:0 tailSpacing:0];
     }
-    
-    _titleLabel = title;
-    _content = content;
-    
-    [self updateHeight];
 }
 
 //MARK: 更新计算高度
@@ -182,17 +238,19 @@
     
     CGFloat height = .0;
     
-    //如果有标题，那就根据  文本高度+45  来确定标题需要的高度，如果没有标题则需要 25 的空白高度
+    //加标题高度
     if (_titleLabel.text.length || _titleLabel.attributedText.length) {
-        height += [_titleLabel sizeThatFits:CGSizeMake(260, 100)].height + 45;
-    }else {
-        height += 25;
+        height += [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7, MAXFLOAT)].height + 20;
+    }
+    //加内容高度
+    if (_content.text.length || _content.attributedText.length) {
+        height += [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7, MAXFLOAT)].height + 20;
     }
     
-    //如果有内容，那内容高度为 文本高度+25， 没有内容，则为0
-    if (_content.text.length || _content.attributedText.length) {
-        height += [_content sizeThatFits:CGSizeMake(260, 400)].height + 25;
-    }
+    //加bottomLine高度
+    height += 20;
+    
+    //加按钮高度
     height += 55;
     _height = height;
 }
@@ -233,14 +291,14 @@
     self.contentHandler = handler;
 }
 
-# pragma mark ================== textView delegate ======================
+# pragma mark - textView delegate
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange {
     self.contentHandler([URL scheme], characterRange);
     return NO;
 }
 
-# pragma mark ================== setter/getter ======================
+# pragma mark - setter/getter
 
 - (void)setTitleText:(NSString *)titleText {
     _titleText = titleText;
@@ -305,7 +363,7 @@
 }
 
 
-#pragma mark ========== 设置自定义转场delegete ==========
+#pragma mark - 设置自定义转场delegete
 
 //给系统提供 你要自定义的转场控制器
 - (nullable UIPresentationController *)presentationControllerForPresentedViewController:(UIViewController *)presented presentingViewController:(nullable UIViewController *)presenting sourceViewController:(UIViewController *)source {
@@ -331,14 +389,14 @@
     return self;
 }
 
-# pragma mark ================== UIViewControllerAnimatedTransitioning ======================
+# pragma mark - UIViewControllerAnimatedTransitioning
 //返回动画事件
 - (NSTimeInterval)transitionDuration:(nullable id <UIViewControllerContextTransitioning>)transitionContext{
     return 0.25;
 }
 //所有的过渡动画事务都在这个方法里面完成
 - (void)animateTransition:(id <UIViewControllerContextTransitioning>)transitionContext{
-
+    
     //取出转场前后的视图控制器
     UIViewController * fromVC = (UIViewController *)[transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
     //取出转场前后视图控制器上的视图view
@@ -372,7 +430,7 @@
 
 @end
 
-# pragma mark ================== WDAlertAction ======================
+# pragma mark - WDAlertAction
 
 @implementation WDAlertAction
 
