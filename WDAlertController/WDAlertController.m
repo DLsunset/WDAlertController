@@ -9,6 +9,7 @@
 #import "WDAlertController.h"
 #import "WDCustomPresentationController.h"
 #import "WDHeader.h"
+#import "UITextView+WDForbiddenCopy.h"
 @interface WDAlertController ()<UIViewControllerTransitioningDelegate,UITextViewDelegate,UIViewControllerAnimatedTransitioning,CALayerDelegate>
 
 //scrollView的content高度
@@ -44,8 +45,8 @@
     WDAlertController *alert = [[WDAlertController alloc] init];
     alert.titleText = title;
     alert.contentText = content;
-    WDAlertAction *cancel = [WDAlertAction actionWithTitle:@"取消" Font:nil attributeTitle:nil handler:nil];
-    WDAlertAction *action = [WDAlertAction actionWithTitle:actionName Font:nil attributeTitle:nil handler:handler];
+    WDAlertAction *cancel = [WDAlertAction actionWithTitle:@"取消" handler:nil];
+    WDAlertAction *action = [WDAlertAction actionWithTitle:actionName handler:handler];
     if (showCancel) {
         [alert.actions addObjectsFromArray:@[action, cancel]];
     }else {
@@ -61,10 +62,20 @@
         self.contentFont = [UIFont systemFontOfSize:15];
         self.contentColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1];
         self.contentLineSpace = 5;
+        self.contentAlignment = NSTextAlignmentLeft;
+        self.dimViewAlpha = .2;
+        self.rectCorner = UIRectCornerAllCorners;
+        self.cornerSize = CGSizeMake(10, 10);
         self.modalPresentationStyle = UIModalPresentationCustom;
         self.transitioningDelegate = self;
     }
     return self;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin) * .7;
+    self.height = self.backScroll.contentSize.height + 55 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 55 ;
 }
 
 # pragma mark - show
@@ -115,32 +126,12 @@
     [self addContent];
     [self addBottomLine];
     
-    
+    [self addTranslucentView];
     [self layoutActions];   //添加按钮
-    [self updateHeight];
+    [self.backScroll layoutIfNeeded];
 }
 
-# pragma mark - 懒加载
-
-- (void)addTopLine {
-    _topLine = [[UIView alloc] init];
-    [self.backScroll addSubview:_topLine];
-    [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.top.height.offset(0.1);
-        make.width.offset(WD_SCREEN_WIDTH * .7);
-    }];
-    _tempView = _topLine;
-}
-
-- (void)addBottomLine {
-    _bottomLine = [[UIView alloc] init];
-    [self.backScroll addSubview:_bottomLine];
-    [_bottomLine mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.bottom.height.offset(0.1);
-        make.top.equalTo(self.tempView.mas_bottom).offset(20);
-    }];
-}
-
+# pragma mark - 控件加载
 - (void)addBackScroll {
     _backScroll = [[UIScrollView alloc] init];
     _backScroll.bounces = NO;
@@ -150,59 +141,101 @@
         make.bottom.offset(-55);
     }];
 }
-
+//MARK: topLine
+- (void)addTopLine {
+    _topLine = [[UIView alloc] init];
+    [self.backScroll addSubview:_topLine];
+    [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.height.offset(0.1);
+        make.width.offset(WD_SCREEN_WIDTH * .7);
+    }];
+    _tempView = _topLine;
+}
+//MARK: bottomLine
+- (void)addBottomLine {
+    _bottomLine = [[UIView alloc] init];
+    [self.backScroll addSubview:_bottomLine];
+    [_bottomLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.height.offset(0.1);
+        make.top.equalTo(self.tempView.mas_bottom).offset(15);
+    }];
+}
+//MARK: titleLabel
 - (void)addTitleLabel {
-    if (self.titleText.length == 0 && self.attributeTitle.length == 0) {
-        return;
-    }
+    //如果没m内容，不加载控件
+    if (self.titleText.length == 0 && self.attributeTitle.length == 0) return;
     
     _titleLabel = [[UILabel alloc] init];
     _titleLabel.textAlignment = NSTextAlignmentCenter;
     _titleLabel.textColor = WD_color_gray(17);
+    
     if (self.titleText) _titleLabel.text = _titleText;
     if (self.titleFont) _titleLabel.font = _titleFont;
     if (self.attributeTitle)  _titleLabel.attributedText = _attributeTitle;
     if (self.titleColor) _titleLabel.textColor = _titleColor;
     
-    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH *.7, MAXFLOAT)].height;
+    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH *.7 - 40, MAXFLOAT)].height;
     [self.backScroll addSubview:_titleLabel];
     [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.offset(15);
-        make.right.offset(-15);
+        make.left.offset(20);
+        make.right.offset(-20);
         make.height.offset(titleHeight);
         make.top.equalTo(self.tempView.mas_bottom).offset(20);
     }];
     _tempView = _titleLabel;
 }
-
+//MARK: content
 - (void)addContent {
-    if (self.contentText.length == 0 && self.attributeContent.length == 0) {
-        return;
-    }
+    //如果没内容，不加载控件
+    if (self.contentText.length == 0 && self.attributeContent.length == 0) return;
     
     _content = [[UITextView alloc] init];
     _content.delegate = self;
     _content.editable = NO;
+    _content.scrollEnabled = NO;
     if (self.contentText) _content.text = _contentText;
     if (self.contentFont) _content.font = _contentFont;
     if (self.attributeContent)  _content.attributedText = _attributeContent;
     
-    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7, MAXFLOAT)].height;
+    //获取textView高度
+    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7 - 40, MAXFLOAT)].height;
+//    _content.textContainerInset = UIEdgeInsetsZero;
+//    _content.textContainer.lineFragmentPadding = 0;
+
     [self.backScroll addSubview:_content];
     [_content mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.offset(15);
-        make.right.offset(-15);
+        make.left.offset(20);
+        make.right.offset(-20);
         make.top.equalTo(self.tempView.mas_bottom).offset(20);
         make.height.offset(contentHeight);
     }];
     _tempView = _content;
 }
+//MARK: 半透明图层
+- (void)addTranslucentView {
+    
+    UIView *view = [[UIView alloc] init];
+    CAGradientLayer *gradient = [CAGradientLayer layer];
+    gradient.startPoint = CGPointMake(.5, 0);
+    gradient.endPoint = CGPointMake(.5, 1);
+    gradient.frame = CGRectMake(0,0,WD_SCREEN_WIDTH * .7,10);
+    UIColor *color1 = WD_color_rgba(255, 255, 255, 0);
+    UIColor *color2 = WD_color_rgba(255, 255, 255, .7);
+    gradient.colors = [NSArray arrayWithObjects:(id)color1.CGColor,(id)color2.CGColor,nil];
+    [view.layer insertSublayer:gradient atIndex:0];
 
-//设置actions按钮
+    [self.view addSubview:view];
+    [view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(self.backScroll);
+        make.height.offset(10);
+    }];
+}
+
+//MARK: layoutActions
 - (void)layoutActions {
-    //***************** 按钮 *******************
+    
     UIView *backView = [[UIView alloc] init];
-    backView.backgroundColor = WD_color_gray(221);
+    backView.backgroundColor = WD_color_gray(180);
     [self.view addSubview:backView];
     [backView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.offset(0);
@@ -215,7 +248,7 @@
         [backView addSubview:btn];
         [btn mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.right.bottom.offset(0);
-            make.top.offset(1);
+            make.top.offset(.5);
         }];
     }else {
         NSMutableArray *actionBtnArr = [NSMutableArray array];
@@ -226,35 +259,13 @@
         }
         [actionBtnArr mas_makeConstraints:^(MASConstraintMaker *make) {
             make.bottom.offset(0);
-            make.top.offset(1);
+            make.top.offset(.5);
         }];
-        [actionBtnArr mas_distributeViewsAlongAxis:MASAxisTypeHorizontal withFixedSpacing:1 leadSpacing:0 tailSpacing:0];
+        [actionBtnArr mas_distributeViewsAlongAxis:MASAxisTypeHorizontal withFixedSpacing:.5 leadSpacing:0 tailSpacing:0];
     }
 }
 
-//MARK: 更新计算高度
-- (void)updateHeight {
-    
-    CGFloat height = .0;
-    
-    //加标题高度
-    if (_titleLabel.text.length || _titleLabel.attributedText.length) {
-        height += [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7, MAXFLOAT)].height + 20;
-    }
-    //加内容高度
-    if (_content.text.length || _content.attributedText.length) {
-        height += [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7, MAXFLOAT)].height + 20;
-    }
-    
-    //加bottomLine高度
-    height += 20;
-    
-    //加按钮高度
-    height += 55;
-    _height = height;
-}
-
-//MARK: 创建按钮
+# pragma mark ----- 创建按钮 ----
 - (UIButton *)creatBtnWithAction:(WDAlertAction *)action withTag:(NSInteger)tag{
     
     UIButton *btn = [[UIButton alloc] init];
@@ -277,6 +288,7 @@
     }
 }
 
+# pragma mark - 添加action
 - (void)addAction:(WDAlertAction *)action {
     [self.actions addObject:action];
 }
@@ -285,6 +297,7 @@
     [self.actions addObject:[WDAlertAction actionWithTitle:title handler:handler]];
 }
 
+# pragma mark - 设置富文本内容
 - (void)setAttributeContent:(NSAttributedString *)attributeContent linkAction:(void(^)(NSString *url,NSRange range))handler {
     self.attributeContent = attributeContent;
     self.contentHandler = handler;
@@ -293,7 +306,9 @@
 # pragma mark - textView delegate
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange {
-    self.contentHandler([URL scheme], characterRange);
+    if (self.contentHandler) {
+        self.contentHandler([URL scheme], characterRange);
+    }
     return NO;
 }
 
@@ -319,7 +334,7 @@
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:attributeContent];
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineSpacing = _contentLineSpace;// 字体的行间距
-    paragraphStyle.alignment = NSTextAlignmentCenter;
+    paragraphStyle.alignment = self.contentAlignment;
     [string addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, string.length)];
     [string addAttribute:NSFontAttributeName value:_contentFont range:NSMakeRange(0, string.length)];
     _attributeContent = string;
@@ -335,11 +350,17 @@
     [self resetContentText];
 }
 
+- (void)setContentLineSpace:(CGFloat)contentLineSpace {
+    _contentLineSpace = contentLineSpace;
+    [self resetContentText];
+}
+
 - (void)setContentColor:(UIColor *)contentColor {
     _contentColor = contentColor;
     [self resetContentText];
 }
 
+//将普通文本换成富文本，为了增加行间距。
 - (void)resetContentText {
     if (_contentText.length == 0) {
         return;
@@ -347,7 +368,7 @@
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:_contentText];
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineSpacing = _contentLineSpace;// 字体的行间距
-    paragraphStyle.alignment = NSTextAlignmentCenter;
+    paragraphStyle.alignment = self.contentAlignment;
     [string addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, string.length)];
     [string addAttribute:NSFontAttributeName value:_contentFont range:NSMakeRange(0, string.length)];
     [string addAttribute:NSForegroundColorAttributeName value:_contentColor range:NSMakeRange(0, string.length)];
@@ -368,12 +389,14 @@
 - (nullable UIPresentationController *)presentationControllerForPresentedViewController:(UIViewController *)presented presentingViewController:(nullable UIViewController *)presenting sourceViewController:(UIViewController *)source {
     
     WDCustomPresentationController *present = [[WDCustomPresentationController alloc] initWithPresentedViewController:presented presentingViewController:source];
+    
     present.constrainBlock = ^(MASConstraintMaker * _Nonnull make) {
         make.center.offset(0);
         make.width.offset(WD_SCREEN_WIDTH * .7);
-        make.height.offset(self->_height);
+        make.height.offset(self.height);
     };
-    present.dimViewAlpha = .2;
+    present.tapDismissEnable = self.tapDismissEnable;
+    present.dimViewAlpha = self.dimViewAlpha;
     present.rectCorner = UIRectCornerAllCorners;
     present.cornerSize = CGSizeMake(10, 10);
     

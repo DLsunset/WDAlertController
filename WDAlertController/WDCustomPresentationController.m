@@ -18,7 +18,7 @@
         self.rectCorner = UIRectCornerAllCorners;
         self.cornerSize = CGSizeMake(0, 0);
         self.heightScale = 1;
-        self.tapDismissEnable = YES;
+        self.tapDismissEnable = NO;
     }
     return self;
 }

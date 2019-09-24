@@ -29,7 +29,7 @@
         make.edges.offset(0);
     }];
     
-    self.dataArr = @[@"普通标题，普通内容",@"富文本标题，富文本内容",@"有标题，无内容",@"无标题，有内容"];
+    self.dataArr = @[@"普通标题，普通内容",@"富文本标题，富文本内容",@"有标题，无内容",@"无标题，有内容",@"系统"];
 }
 
 # pragma mark - tableView delegate  datasource 
@@ -75,21 +75,25 @@
 //普通标题，普通内容
 - (void)showType1 {
     
-    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancelAction:YES];
-    
+    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancelAction:YES];
+    alert.contentLineSpace = 8;
     [alert show];
 }
 
 //富文本标题，富文本内容
 - (void)showType2 {
     NSAttributedString *title = [[NSAttributedString alloc] initWithString:@"一千年以后" attributes:@{NSForegroundColorAttributeName : [UIColor blueColor]}];
-    NSString *contentStr = @"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞";
+    NSString *contentStr = @"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞";
     NSMutableAttributedString *content = [[NSMutableAttributedString alloc] initWithString:contentStr attributes:@{NSForegroundColorAttributeName : [UIColor brownColor]}];
     [content addAttributes:@{NSForegroundColorAttributeName : [UIColor redColor]} range:[contentStr rangeOfString:@"一千年以后"]];
+    [content addAttribute:NSLinkAttributeName value:@"privacy://" range:[contentStr rangeOfString:@"一千年以后"]];
     WDAlertController *alert = [[WDAlertController alloc] init];
     alert.attributeTitle = title;
-    alert.attributeContent = content;
+    
     [alert addActionWithTitle:@"好听" handler:nil];
+    [alert setAttributeContent:content linkAction:^(NSString * _Nonnull url, NSRange range) {
+        NSLog(@"点击链接");
+    }];
     [alert show];
 }
 
@@ -108,11 +112,11 @@
 
 - (void)showType5 {
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"一千年以后" message:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" preferredStyle:UIAlertControllerStyleAlert];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.frame = CGRectMake(CGRectGetMinX(textField.frame), CGRectGetMinY(textField.frame), CGRectGetWidth(textField.frame), 100);
-    }];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"一千年以后" message:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"好听" style:UIAlertActionStyleDefault handler:nil];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"一千年以后";
+    }];
     [alert addAction:action];
     [self presentViewController:alert animated:YES completion:nil];
     

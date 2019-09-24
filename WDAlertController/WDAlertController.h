@@ -13,96 +13,106 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WDAlertController : UIViewController
 
-/**
- 标题
- */
+/// 标题
 @property (nonatomic, copy) NSString *titleText;
 
-/**
- 正文
- */
+/// 正文
 @property (nonatomic, copy) NSString *contentText;
 
-/**
- 富文本标题
- */
+/// 富文本标题
 @property (nonatomic, copy) NSAttributedString *attributeTitle;
 
-/**
- 富文本正文
- */
+/// 富文本正文
 @property (nonatomic, copy) NSAttributedString *attributeContent;
 
-/**
- 标题颜色
- */
+/// 标题颜色
 @property (nonatomic, strong) UIColor *titleColor;
 
-/**
- 标题字体
- */
+/// 标题字体
 @property (nonatomic, strong) UIFont *titleFont;
 
-/**
- 正文字体
- */
+/// 正文字体
 @property (nonatomic, strong) UIFont *contentFont;
 
-/**
- 正文颜色
- */
+/// 正文颜色
 @property (nonatomic, strong) UIColor *contentColor;
-/**
- 正文行间距，默认5
- */
+
+/// 正文行间距，默认5, 只对普通文本contentText生效，对富文本attributeContent无效
 @property (nonatomic, assign) CGFloat contentLineSpace;
 
+/// 默认 NSTextAlignmentLeft
+@property (nonatomic, assign) NSTextAlignment contentAlignment;
+
+/// 点击背景蒙层dismiss，默认为NO
+@property (nonatomic, assign) BOOL tapDismissEnable;
+
+/// 设置圆角的选择，默认为UIRectCornerAllCorners
+@property (nonatomic, assign) UIRectCorner rectCorner;
+
+/// 圆角size，默认为(10,10)
+@property (nonatomic, assign) CGSize cornerSize;
+
+/// 背景蒙版透明度 0 ~ 1，默认0.2
+@property (nonatomic, assign) CGFloat dimViewAlpha;
+
+/// 背景蒙版颜色， 默认黑色
+@property (nonatomic, strong) UIColor *dimViewColor;
+
+/// 构造方法，传入标题、内容、操作按钮
+/// @param title 标题
+/// @param content 内容
+/// @param actions 操作
 + (instancetype)alertWithTitle:(nullable NSString *)title content:(nullable NSString *)content actions:(NSArray <WDAlertAction *>*)actions;
+
+/// 构造方法。传入标题、内容、操作按钮名称、操作回调、是否展示取消按钮
+/// @param title 标题
+/// @param content 内容
+/// @param actionName 操作按钮名称
+/// @param handler 操作回调
+/// @param showCancel 是否展示取消按钮
 + (instancetype)alertWithTitle:(nullable NSString *)title content:(nullable NSString *)content actionName:(NSString *)actionName ActionHandle:(nullable void(^)(WDAlertAction *action))handler cancelAction:(BOOL)showCancel;
+
+/// 添加操作按钮。
+/// @param action 操作action
 - (void)addAction:(WDAlertAction *)action;
+
+/// 添加操作按钮。传入名称、回调
+/// @param title 名称
+/// @param handler 回调
 - (void)addActionWithTitle:(NSString *)title handler:(nullable void(^)(WDAlertAction *action))handler;
 
+/// 以presentController的形式，展示弹窗。
 - (void)show;
 
-/**
- 针对有链接点击事件的富文本
-
- @param attributeContent 富文本内容
- @param handler 点击链接的处理
- */
+/// 针对有链接点击事件的富文本
+/// @param attributeContent 富文本内容
+/// @param handler 点击链接的回调
 - (void)setAttributeContent:(NSAttributedString *)attributeContent linkAction:(void(^)(NSString *url,NSRange range))handler;
 @end
 
 
-//MARK: WDAlertAction类
+# pragma mark - WDAlertAction类
+
 @interface WDAlertAction : NSObject
 
-/**
- 按钮标题
- */
+/// 标题
 @property (nonatomic, copy) NSString *title;
 
-/**
- 按钮字体
- */
+/// 字体
 @property (nonatomic, strong) UIFont *font;
 
-/**
- 按钮颜色
- */
+/// 文字颜色
 @property (nonatomic, strong) UIColor *titleColor;
 
-/**
- 按钮富文本标题
- */
+/// 富文本标题
 @property (nonatomic, copy) NSAttributedString *attributeTitle;
 
-/**
- 按钮点击事件回调
- */
+/// 点击回调
 @property (nonatomic, copy) void(^handler)(WDAlertAction *action);
 
-+ (instancetype)actionWithTitle:(nullable NSString *)title Font:(nullable UIFont *)font attributeTitle:(nullable NSAttributedString *)attributeTitle handler:(void (^ __nullable)(WDAlertAction *action))handler;
+/// 构造方法。传入标题、操作回调
+/// @param title 标题名称
+/// @param handler 操作回调
 + (instancetype)actionWithTitle:(nullable NSString *)title handler:(void (^ __nullable)(WDAlertAction *action))handler;
 @end
 

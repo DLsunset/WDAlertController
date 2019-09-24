@@ -15,6 +15,7 @@
 		4FD06DF52333889E00CEDD5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4FD06DF42333889E00CEDD5C /* Assets.xcassets */; };
 		4FD06DF82333889E00CEDD5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4FD06DF62333889E00CEDD5C /* LaunchScreen.storyboard */; };
 		4FD06DFB2333889E00CEDD5C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FD06DFA2333889E00CEDD5C /* main.m */; };
+		4FD41C812339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41C802339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m */; };
 		55B6351E548AA9352F4D2840 /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAD2256968136C6E28B3629 /* Pods_Demo.framework */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,8 @@
 		4FD06DF72333889E00CEDD5C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4FD06DF92333889E00CEDD5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4FD06DFA2333889E00CEDD5C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4FD41C7F2339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UITextView+WDForbiddenCopy.h"; sourceTree = "<group>"; };
+		4FD41C802339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UITextView+WDForbiddenCopy.m"; sourceTree = "<group>"; };
 		9ADA2C48F1161B73C3CA4429 /* Pods-Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.debug.xcconfig"; path = "Target Support Files/Pods-Demo/Pods-Demo.debug.xcconfig"; sourceTree = "<group>"; };
 		ABAD2256968136C6E28B3629 /* Pods_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -63,11 +66,13 @@
 		4F9A221323349B4700D713DA /* WDAlertController */ = {
 			isa = PBXGroup;
 			children = (
+				4F92C85623389C4B002BD120 /* WDHeader.h */,
 				4F9A221623349B4700D713DA /* WDAlertController.h */,
 				4F9A221423349B4700D713DA /* WDAlertController.m */,
 				4F9A221723349B4700D713DA /* WDCustomPresentationController.h */,
 				4F9A221523349B4700D713DA /* WDCustomPresentationController.m */,
-				4F92C85623389C4B002BD120 /* WDHeader.h */,
+				4FD41C7F2339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.h */,
+				4FD41C802339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m */,
 			);
 			name = WDAlertController;
 			path = ../../WDAlertController;
@@ -236,6 +241,7 @@
 				4F9A221923349B4700D713DA /* WDCustomPresentationController.m in Sources */,
 				4F9A221823349B4700D713DA /* WDAlertController.m in Sources */,
 				4FD06DED2333889D00CEDD5C /* AppDelegate.m in Sources */,
+				4FD41C812339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
