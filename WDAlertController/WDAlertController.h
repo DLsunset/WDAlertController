@@ -43,20 +43,23 @@ NS_ASSUME_NONNULL_BEGIN
 /// 默认 NSTextAlignmentLeft
 @property (nonatomic, assign) NSTextAlignment contentAlignment;
 
+///按钮集合
+@property (nonatomic, strong) NSMutableArray <WDAlertAction *>*actions;
+
 /// 点击背景蒙层dismiss，默认为NO
 @property (nonatomic, assign) BOOL tapDismissEnable;
 
-/// 设置圆角的选择，默认为UIRectCornerAllCorners
-@property (nonatomic, assign) UIRectCorner rectCorner;
+/// 圆角size，默认为10
+@property (nonatomic, assign) CGFloat cornerRadius;
 
-/// 圆角size，默认为(10,10)
-@property (nonatomic, assign) CGSize cornerSize;
-
-/// 背景蒙版透明度 0 ~ 1，默认0.2
+/// 背景蒙版透明度 0 ~ 1，默认0.4
 @property (nonatomic, assign) CGFloat dimViewAlpha;
 
 /// 背景蒙版颜色， 默认黑色
 @property (nonatomic, strong) UIColor *dimViewColor;
+
+/// 用于设置弹窗展示区域不是整个屏幕时，应有的边距。
+@property (nonatomic, assign) UIEdgeInsets showAreaMarginInsets;
 
 /// 构造方法，传入标题、内容、操作按钮
 /// @param title 标题

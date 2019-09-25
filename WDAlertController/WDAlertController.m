@@ -12,16 +12,17 @@
 #import "UITextView+WDForbiddenCopy.h"
 @interface WDAlertController ()<UIViewControllerTransitioningDelegate,UITextViewDelegate,UIViewControllerAnimatedTransitioning,CALayerDelegate>
 
-//scrollView的content高度
+//弹窗高度、宽度
 @property (nonatomic, assign) CGFloat height;
+@property (nonatomic, assign) CGFloat width;
 
 //UI控件
+@property (nonatomic, strong) UIView *backgroundView;
 @property (nonatomic, strong) UIScrollView *backScroll;     //底层scroll
 @property (nonatomic, strong) UIView *topLine;              //scrollView最上面的控件，高度为0，用于作为第一个tempView
 @property (nonatomic, strong) UIView *bottomLine;           //scrollView最下面的控件, 高度为0，用于作为最后一个控件
 @property (nonatomic, strong) UILabel *titleLabel;          //标题label
 @property (nonatomic, strong) UITextView *content;          //内容Label
-@property (nonatomic, strong) NSMutableArray *actions;      //按钮集合
 
 @property (nonatomic, strong) UIView *tempView;
 
@@ -63,19 +64,13 @@
         self.contentColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1];
         self.contentLineSpace = 5;
         self.contentAlignment = NSTextAlignmentLeft;
-        self.dimViewAlpha = .2;
-        self.rectCorner = UIRectCornerAllCorners;
-        self.cornerSize = CGSizeMake(10, 10);
+        self.dimViewAlpha = .4;
+        self.cornerRadius = 10;
+        self.showAreaMarginInsets = UIEdgeInsetsZero;
         self.modalPresentationStyle = UIModalPresentationCustom;
         self.transitioningDelegate = self;
     }
     return self;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin) * .7;
-    self.height = self.backScroll.contentSize.height + 55 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 55 ;
 }
 
 # pragma mark - show
@@ -84,7 +79,9 @@
 }
 
 - (void)presentVc:(UIViewController *)vc {
-    [[self getUsefulController:[self topViewController]]  presentViewController:vc animated:YES completion:nil];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[self getUsefulController:[self topViewController]]  presentViewController:vc animated:YES completion:nil];
+    });
 }
 
 //获取顶层可用的控制器
@@ -118,7 +115,22 @@
 # pragma mark - viewDidLoad
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor whiteColor];
+
+    self.view.layer.cornerRadius = self.cornerRadius;
+    self.view.layer.shadowColor = [UIColor darkGrayColor].CGColor;
+    self.view.layer.shadowRadius = 10;
+    self.view.layer.shadowOpacity = .3;
+    self.view.layer.shadowOffset = CGSizeMake(0, 0);
+    
+    self.backgroundView = [[UIView alloc] init];
+    self.backgroundView.backgroundColor = [UIColor whiteColor];
+    self.backgroundView.layer.cornerRadius = self.cornerRadius;
+    self.backgroundView.layer.masksToBounds = YES;
+    
+    [self.view addSubview:self.backgroundView];
+    [self.backgroundView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.offset(0);
+    }];
     
     [self addBackScroll];
     [self addTopLine];
@@ -131,14 +143,34 @@
     [self.backScroll layoutIfNeeded];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin - self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom ) * .9;
+    self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50 ;
+}
+
+# pragma mark - 更新弹窗位置大小
+- (void)updateLayout {
+    [self.view mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.offset((self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom) * .5);
+        make.centerX.offset((self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .5);
+        make.width.offset(self.width);
+        make.height.offset(self.height);
+    }];
+    [self.view setNeedsUpdateConstraints];
+    [UIView animateWithDuration:.25 animations:^{
+        [self.view.superview layoutIfNeeded];
+    }];
+}
+
 # pragma mark - 控件加载
 - (void)addBackScroll {
     _backScroll = [[UIScrollView alloc] init];
     _backScroll.bounces = NO;
-    [self.view addSubview:_backScroll];
+    [self.backgroundView addSubview:_backScroll];
     [_backScroll mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.top.offset(0);
-        make.bottom.offset(-55);
+        make.bottom.offset(- 50);
     }];
 }
 //MARK: topLine
@@ -147,7 +179,7 @@
     [self.backScroll addSubview:_topLine];
     [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.top.height.offset(0.1);
-        make.width.offset(WD_SCREEN_WIDTH * .7);
+        make.width.offset(self.width);
     }];
     _tempView = _topLine;
 }
@@ -236,7 +268,7 @@
     
     UIView *backView = [[UIView alloc] init];
     backView.backgroundColor = WD_color_gray(180);
-    [self.view addSubview:backView];
+    [self.backgroundView addSubview:backView];
     [backView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.offset(0);
         make.top.equalTo(self.backScroll.mas_bottom);
@@ -329,6 +361,11 @@
     [self resetContentText];
 }
 
+- (void)setContentAlignment:(NSTextAlignment)contentAlignment {
+    _contentAlignment = contentAlignment;
+    self.attributeContent = _attributeContent;
+}
+
 - (void)setAttributeContent:(NSAttributedString *)attributeContent {
     
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:attributeContent];
@@ -382,6 +419,13 @@
     return _actions;
 }
 
+- (void)setShowAreaMarginInsets:(UIEdgeInsets)showAreaMarginInsets {
+    _showAreaMarginInsets = showAreaMarginInsets;
+    self.width = (WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .7;
+    CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin - self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom ) * .9;
+    self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50 ;
+
+}
 
 #pragma mark - 设置自定义转场delegete
 
@@ -391,14 +435,13 @@
     WDCustomPresentationController *present = [[WDCustomPresentationController alloc] initWithPresentedViewController:presented presentingViewController:source];
     
     present.constrainBlock = ^(MASConstraintMaker * _Nonnull make) {
-        make.center.offset(0);
-        make.width.offset(WD_SCREEN_WIDTH * .7);
+        make.centerY.offset((self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom) * .5);
+        make.centerX.offset((self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .5);
+        make.width.offset(self.width);
         make.height.offset(self.height);
     };
     present.tapDismissEnable = self.tapDismissEnable;
     present.dimViewAlpha = self.dimViewAlpha;
-    present.rectCorner = UIRectCornerAllCorners;
-    present.cornerSize = CGSizeMake(10, 10);
     
     return present;
 }
@@ -432,14 +475,14 @@
         [containerView addSubview:fromView];
         containerView.alpha = 1;
         [UIView animateWithDuration:.25 delay:0 options:UIViewAnimationOptionCurveEaseInOut animations:^{
-            fromView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+//            fromView.transform = CGAffineTransformMakeScale(1.2, 1.2);
             containerView.alpha = 0;
         } completion:^(BOOL finished) {
             [transitionContext completeTransition:YES];
         }];
     }else { //被present
         [containerView addSubview:toView];
-        toView.transform = CGAffineTransformMakeScale(1.05, 1.05);
+        toView.transform = CGAffineTransformMakeScale(1.15, 1.15);
         containerView.alpha = 0;
         [UIView animateWithDuration:.25 animations:^{
             toView.transform = CGAffineTransformIdentity;
@@ -459,7 +502,6 @@
 + (instancetype)actionWithTitle:(nullable NSString *)title Font:(nullable UIFont *)font attributeTitle:(nullable NSAttributedString *)attributeTitle handler:(void (^ __nullable)(WDAlertAction *action))handler {
     
     WDAlertAction *action = [[WDAlertAction alloc] init];
-    [action setDefaultValue];
     action.title = title;
     if (font) action.font = font;
     action.attributeTitle = attributeTitle;
@@ -469,15 +511,23 @@
 
 + (instancetype)actionWithTitle:(nullable NSString *)title handler:(void (^ __nullable)(WDAlertAction *action))handler {
     WDAlertAction *action = [[WDAlertAction alloc] init];
-    [action setDefaultValue];
     action.title = title;
     action.handler = handler;
     return action;
 }
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        [self setDefaultValue];
+    }
+    return self;
+}
+
 - (void)setDefaultValue{
     self.titleColor = [UIColor colorWithRed:17/255.0 green:17/255.0 blue:17/255.0 alpha:1];
-    self.font = [UIFont systemFontOfSize:18];
+    self.font = [UIFont fontWithName:@"PingFangSC-Medium" size:17];
 }
 
 @end

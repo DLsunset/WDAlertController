@@ -8,6 +8,12 @@
 
 #import "WDCustomPresentationController.h"
 
+@interface WDCustomPresentationController ()
+
+@property (nonatomic, strong) UIView *dimView;
+
+@end
+
 @implementation WDCustomPresentationController
 
 - (instancetype)initWithPresentedViewController:(UIViewController *)presentedViewController presentingViewController:(UIViewController *)presentingViewController {
@@ -57,21 +63,25 @@
         presentedView.layer.mask = maskLayer;
     }
     
-    // 设置蒙版 改变透明度
-    UIView *dimView = [[UIView alloc] init];
-    dimView.backgroundColor = [UIColor blackColor];
-    dimView.alpha = self.dimViewAlpha;
-    [contanerView insertSubview:dimView atIndex:0];
+    // 设置蒙版颜色 改变透明度
+    self.dimView.backgroundColor = self.dimViewColor;
+    self.dimView.alpha = self.dimViewAlpha;
     
-    [dimView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.bottom.top.equalTo(contanerView);
-    }];
-    
-    //5.添加tap
-    if (self.tapDismissEnable) {
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
-        [dimView addGestureRecognizer:tap];
+}
+
+- (UIView *)dimView {
+    if (!_dimView) {
+        _dimView = [[UIView alloc] init];
+        [self.containerView insertSubview:_dimView atIndex:0];
+        [_dimView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.right.bottom.top.offset(0);
+        }];
+        if (self.tapDismissEnable) {
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction:)];
+            [_dimView addGestureRecognizer:tap];
+        }
     }
+    return _dimView;
 }
 
 //销毁控制器

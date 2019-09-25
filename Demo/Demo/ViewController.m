@@ -48,8 +48,6 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    //当cell的selectionStyle = UITableViewCellSelectionStyleNone时，present控制器会有延时，把这个操作放到主线程就可以了
-    dispatch_async(dispatch_get_main_queue(), ^{
         switch (indexPath.row) {
             case 0:
                 [self showType1];
@@ -69,14 +67,19 @@
             default:
                 break;
         }
-    });
 }
 
 //普通标题，普通内容
 - (void)showType1 {
     
-    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:nil cancelAction:YES];
+    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" actionName:@"好听" ActionHandle:^(WDAlertAction * _Nonnull action) {
+        
+    } cancelAction:YES];
     alert.contentLineSpace = 8;
+//    alert.dimViewAlpha = 0;
+    alert.actions.firstObject.titleColor = [UIColor blueColor];
+    alert.contentAlignment = NSTextAlignmentCenter;
+    alert.showAreaMarginInsets = UIEdgeInsetsMake(300, 0, 0, 0);
     [alert show];
 }
 
@@ -114,11 +117,12 @@
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"一千年以后" message:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"好听" style:UIAlertActionStyleDefault handler:nil];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.placeholder = @"一千年以后";
-    }];
+//    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+//        textField.placeholder = @"一千年以后";
+//    }];
     [alert addAction:action];
-    [self presentViewController:alert animated:YES completion:nil];
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self presentViewController:alert animated:YES completion:nil];
+    });
 }
 @end
