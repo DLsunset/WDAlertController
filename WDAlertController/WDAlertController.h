@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// 富文本标题
 @property (nonatomic, copy) NSAttributedString *attributeTitle;
 
-/// 富文本正文
+/// 富文本正文   若设置了contentText，则此项无效
 @property (nonatomic, copy) NSAttributedString *attributeContent;
 
 /// 标题颜色
@@ -37,7 +37,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// 正文颜色
 @property (nonatomic, strong) UIColor *contentColor;
 
-/// 正文行间距，默认5, 只对普通文本contentText生效，对富文本attributeContent无效
+
+/// 添加的textFields,如果没添加，则为nil
+@property (nonatomic, copy) NSArray *textFields;
+
+/// 正文行间距，默认5
 @property (nonatomic, assign) CGFloat contentLineSpace;
 
 /// 默认 NSTextAlignmentLeft
@@ -83,6 +87,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param title 名称
 /// @param handler 回调
 - (void)addActionWithTitle:(NSString *)title handler:(nullable void(^)(WDAlertAction *action))handler;
+
+- (void)addTextFieldWithConfigurationHandler:(void(^)(UITextField *textField))handler;
 
 /// 以presentController的形式，展示弹窗。
 - (void)show;

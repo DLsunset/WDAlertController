@@ -16,6 +16,7 @@
 		4FD06DF82333889E00CEDD5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4FD06DF62333889E00CEDD5C /* LaunchScreen.storyboard */; };
 		4FD06DFB2333889E00CEDD5C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FD06DFA2333889E00CEDD5C /* main.m */; };
 		4FD41C812339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41C802339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m */; };
+		4FE3D7E6233C514D0015F938 /* WDKeyboardManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE3D7E5233C514D0015F938 /* WDKeyboardManager.m */; };
 		55B6351E548AA9352F4D2840 /* Pods_Demo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABAD2256968136C6E28B3629 /* Pods_Demo.framework */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,8 @@
 		4FD06DFA2333889E00CEDD5C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4FD41C7F2339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UITextView+WDForbiddenCopy.h"; sourceTree = "<group>"; };
 		4FD41C802339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UITextView+WDForbiddenCopy.m"; sourceTree = "<group>"; };
+		4FE3D7E4233C514D0015F938 /* WDKeyboardManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WDKeyboardManager.h; sourceTree = "<group>"; };
+		4FE3D7E5233C514D0015F938 /* WDKeyboardManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WDKeyboardManager.m; sourceTree = "<group>"; };
 		9ADA2C48F1161B73C3CA4429 /* Pods-Demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Demo.debug.xcconfig"; path = "Target Support Files/Pods-Demo/Pods-Demo.debug.xcconfig"; sourceTree = "<group>"; };
 		ABAD2256968136C6E28B3629 /* Pods_Demo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Demo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -69,6 +72,8 @@
 				4F92C85623389C4B002BD120 /* WDHeader.h */,
 				4F9A221623349B4700D713DA /* WDAlertController.h */,
 				4F9A221423349B4700D713DA /* WDAlertController.m */,
+				4FE3D7E4233C514D0015F938 /* WDKeyboardManager.h */,
+				4FE3D7E5233C514D0015F938 /* WDKeyboardManager.m */,
 				4F9A221723349B4700D713DA /* WDCustomPresentationController.h */,
 				4F9A221523349B4700D713DA /* WDCustomPresentationController.m */,
 				4FD41C7F2339ECBF00CCBA04 /* UITextView+WDForbiddenCopy.h */,
@@ -237,6 +242,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4FD06DF02333889D00CEDD5C /* ViewController.m in Sources */,
+				4FE3D7E6233C514D0015F938 /* WDKeyboardManager.m in Sources */,
 				4FD06DFB2333889E00CEDD5C /* main.m in Sources */,
 				4F9A221923349B4700D713DA /* WDCustomPresentationController.m in Sources */,
 				4F9A221823349B4700D713DA /* WDAlertController.m in Sources */,
@@ -387,7 +393,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = VY63TUJ896;
+				DEVELOPMENT_TEAM = R94W75T2VA;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Masonry/Masonry.framework/Headers\"",
@@ -399,7 +405,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.donglei.Demo1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.donglei.Demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -414,7 +420,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = VY63TUJ896;
+				DEVELOPMENT_TEAM = R94W75T2VA;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Masonry/Masonry.framework/Headers\"",
@@ -426,7 +432,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.donglei.Demo1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.donglei.Demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -79,7 +79,13 @@
 //    alert.dimViewAlpha = 0;
     alert.actions.firstObject.titleColor = [UIColor blueColor];
     alert.contentAlignment = NSTextAlignmentCenter;
-    alert.showAreaMarginInsets = UIEdgeInsetsMake(300, 0, 0, 0);
+    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"text1";
+    }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"text2";
+    }];
+
     [alert show];
 }
 
@@ -117,9 +123,9 @@
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"一千年以后" message:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"好听" style:UIAlertActionStyleDefault handler:nil];
-//    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-//        textField.placeholder = @"一千年以后";
-//    }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"一千年以后";
+    }];
     [alert addAction:action];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self presentViewController:alert animated:YES completion:nil];

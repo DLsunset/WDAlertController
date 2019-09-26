@@ -10,11 +10,15 @@
 #import "WDCustomPresentationController.h"
 #import "WDHeader.h"
 #import "UITextView+WDForbiddenCopy.h"
-@interface WDAlertController ()<UIViewControllerTransitioningDelegate,UITextViewDelegate,UIViewControllerAnimatedTransitioning,CALayerDelegate>
+#import "WDKeyboardManager.h"
+
+@interface WDAlertController ()<UIViewControllerTransitioningDelegate,UITextViewDelegate,UIViewControllerAnimatedTransitioning,WDKeyboardDelegate>
 
 //弹窗高度、宽度
 @property (nonatomic, assign) CGFloat height;
 @property (nonatomic, assign) CGFloat width;
+
+@property (nonatomic, assign) BOOL didAppear;
 
 //UI控件
 @property (nonatomic, strong) UIView *backgroundView;
@@ -26,6 +30,7 @@
 
 @property (nonatomic, strong) UIView *tempView;
 
+@property (nonatomic, strong) NSMutableArray *textFieldsArr;
 //content中富文本的Link点击事件
 @property (nonatomic, copy) void(^contentHandler)(NSString *url,NSRange range);
 
@@ -115,7 +120,8 @@
 # pragma mark - viewDidLoad
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    [self updateViewSize];
+    
     self.view.layer.cornerRadius = self.cornerRadius;
     self.view.layer.shadowColor = [UIColor darkGrayColor].CGColor;
     self.view.layer.shadowRadius = 10;
@@ -132,15 +138,24 @@
         make.edges.offset(0);
     }];
     
+    [self resetContentText];
+    
     [self addBackScroll];
     [self addTopLine];
     [self addTitleLabel];
     [self addContent];
+    
+    for (UITextField *textField in self.textFieldsArr) {
+        [self addTextField:textField];
+    }
+    
     [self addBottomLine];
     
-    [self addTranslucentView];
+    [self addTranslucentView];  //底部半透明蒙层
     [self layoutActions];   //添加按钮
     [self.backScroll layoutIfNeeded];
+    
+    [[WDKeyboardManager defaultManager] addObserver:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -149,18 +164,13 @@
     self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50 ;
 }
 
-# pragma mark - 更新弹窗位置大小
-- (void)updateLayout {
-    [self.view mas_remakeConstraints:^(MASConstraintMaker *make) {
-        make.centerY.offset((self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom) * .5);
-        make.centerX.offset((self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .5);
-        make.width.offset(self.width);
-        make.height.offset(self.height);
-    }];
-    [self.view setNeedsUpdateConstraints];
-    [UIView animateWithDuration:.25 animations:^{
-        [self.view.superview layoutIfNeeded];
-    }];
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    self.didAppear = YES;
+}
+
+- (void)dealloc {
+    [[WDKeyboardManager defaultManager] removeObserver:self];
 }
 
 # pragma mark - 控件加载
@@ -243,6 +253,29 @@
     }];
     _tempView = _content;
 }
+
+- (void)addTextFieldWithConfigurationHandler:(void(^)(UITextField *textField))handler {
+    UITextField *textField = [[UITextField alloc] init];
+    if (handler) {
+        handler(textField);
+    }
+    [self.textFieldsArr addObject:textField];
+}
+
+- (void)addTextField:(UITextField *)textField {
+    
+    textField.layer.borderColor = WD_color_gray(117).CGColor;
+    textField.layer.borderWidth = 1;
+    [self.backScroll addSubview:textField];
+    [textField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.offset(20);
+        make.right.offset(-20);
+        make.topMargin.equalTo(self.tempView.mas_bottom).offset(20);
+        make.height.offset(30);
+    }];
+    _tempView = textField;
+}
+
 //MARK: 半透明图层
 - (void)addTranslucentView {
     
@@ -314,6 +347,7 @@
 
 - (void)actionClick:(UIButton *)sender {
     WDAlertAction *action = self.actions[sender.tag];
+    [self.view endEditing:YES];
     [self dismissViewControllerAnimated:YES completion:nil];
     if (action.handler) {
         action.handler(action);
@@ -346,19 +380,21 @@
 
 # pragma mark - setter/getter
 
-- (void)setTitleText:(NSString *)titleText {
-    _titleText = titleText;
+- (NSMutableArray *)textFieldsArr {
+    if (!_textFieldsArr) {
+        _textFieldsArr = [NSMutableArray array];
+    }
+    return _textFieldsArr;
+}
+
+- (NSArray *)textFields {
+    return _textFieldsArr.copy;
 }
 
 - (void)setAttributeTitle:(NSAttributedString *)attributeTitle {
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:attributeTitle];
     [string addAttribute:NSFontAttributeName value:_titleFont range:NSMakeRange(0, string.length)];
     _attributeTitle = string;
-}
-
-- (void)setContentText:(NSString *)contentText {
-    _contentText = contentText;
-    [self resetContentText];
 }
 
 - (void)setContentAlignment:(NSTextAlignment)contentAlignment {
@@ -376,25 +412,6 @@
     [string addAttribute:NSFontAttributeName value:_contentFont range:NSMakeRange(0, string.length)];
     _attributeContent = string;
     
-}
-
-- (void)setTitleFont:(UIFont *)titleFont {
-    _titleFont = titleFont;
-}
-
-- (void)setContentFont:(UIFont *)contentFont {
-    _contentFont = contentFont;
-    [self resetContentText];
-}
-
-- (void)setContentLineSpace:(CGFloat)contentLineSpace {
-    _contentLineSpace = contentLineSpace;
-    [self resetContentText];
-}
-
-- (void)setContentColor:(UIColor *)contentColor {
-    _contentColor = contentColor;
-    [self resetContentText];
 }
 
 //将普通文本换成富文本，为了增加行间距。
@@ -419,14 +436,65 @@
     return _actions;
 }
 
+# pragma mark - 更新布局相关操作
+
 - (void)setShowAreaMarginInsets:(UIEdgeInsets)showAreaMarginInsets {
     _showAreaMarginInsets = showAreaMarginInsets;
-    self.width = (WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .7;
-    CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin - self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom ) * .9;
-    self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50 ;
-
 }
 
+- (void)setWidth:(CGFloat)width {
+    _width = width;
+}
+
+- (void)updateViewSize {
+    self.width = (WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .7;
+    CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin - self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom ) * .9;
+    self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50;
+}
+
+- (void)layoutSubviewsConstrain {
+    [self.topLine mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.width.offset(self.width);
+    }];
+    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7 - 40, MAXFLOAT)].height;
+    [_content mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.height.offset(contentHeight);
+    }];
+    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH *.7 - 40, MAXFLOAT)].height;
+    [_titleLabel mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.height.offset(titleHeight);
+    }];
+    
+    if (self.didAppear) {
+        [UIView animateWithDuration:.25 animations:^{
+            [self.backScroll layoutIfNeeded];
+        }];
+    }
+}
+
+- (void)updateLayout {
+    [self updateViewSize];
+    [self.view mas_remakeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.offset((self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom) * .5);
+        make.centerX.offset((self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .5);
+        make.width.offset(self.width);
+        make.height.offset(self.height);
+    }];
+    [self.view setNeedsUpdateConstraints];
+    [UIView animateWithDuration:.25 animations:^{
+        [self.view.superview layoutIfNeeded];
+    }];
+    
+}
+
+# pragma mark - WDKeyboardDelegate
+
+- (void)keyboardWillChangeWithInfo:(WDKeyboardInfo)info {
+    UIEdgeInsets toEdgeInsets = self.showAreaMarginInsets;
+    toEdgeInsets.bottom = WD_SCREEN_HEIGHT - info.toFrame.origin.y;
+    self.showAreaMarginInsets = toEdgeInsets;
+    [self updateLayout];
+}
 #pragma mark - 设置自定义转场delegete
 
 //给系统提供 你要自定义的转场控制器
@@ -435,6 +503,8 @@
     WDCustomPresentationController *present = [[WDCustomPresentationController alloc] initWithPresentedViewController:presented presentingViewController:source];
     
     present.constrainBlock = ^(MASConstraintMaker * _Nonnull make) {
+        [self updateViewSize];
+        [self layoutSubviewsConstrain];
         make.centerY.offset((self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom) * .5);
         make.centerX.offset((self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .5);
         make.width.offset(self.width);

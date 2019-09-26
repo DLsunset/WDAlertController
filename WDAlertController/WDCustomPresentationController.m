@@ -42,7 +42,8 @@
     
     //修改展示控制器的VIew的frame 或者  mas
     if (_constrainBlock) {
-        [presentedView mas_makeConstraints:_constrainBlock];
+//        [presentedView mas_makeConstraints:_constrainBlock];
+        [presentedView mas_updateConstraints:_constrainBlock];
         [contanerView layoutIfNeeded];
     }
     
