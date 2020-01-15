@@ -64,7 +64,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.titleFont = [UIFont fontWithName:@"PingFangSC-Semibold" size:18];
+        self.titleFont = [UIFont fontWithName:@"PingFangSC-Semibold" size:17];
         self.contentFont = [UIFont systemFontOfSize:15];
         self.contentColor = [UIColor colorWithRed:51/255.0 green:51/255.0 blue:51/255.0 alpha:1];
         self.contentLineSpace = 5;
@@ -72,8 +72,10 @@
         self.dimViewAlpha = .4;
         self.cornerRadius = 10;
         self.showAreaMarginInsets = UIEdgeInsetsZero;
+        self.buttonHeight = 44.0;
         self.modalPresentationStyle = UIModalPresentationCustom;
         self.transitioningDelegate = self;
+        
     }
     return self;
 }
@@ -127,6 +129,7 @@
     self.view.layer.shadowRadius = 10;
     self.view.layer.shadowOpacity = .3;
     self.view.layer.shadowOffset = CGSizeMake(0, 0);
+    self.view.clipsToBounds = YES;
     
     self.backgroundView = [[UIView alloc] init];
     self.backgroundView.backgroundColor = [UIColor whiteColor];
@@ -138,6 +141,14 @@
         make.edges.offset(0);
     }];
     
+    if (_showBlurBackView) {
+        UIVisualEffectView *bacVE = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+        [self.backgroundView addSubview:bacVE];
+        [bacVE mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.offset(0);
+        }];
+    }
+    
     [self resetContentText];
     
     [self addBackScroll];
@@ -148,10 +159,10 @@
     for (UITextField *textField in self.textFieldsArr) {
         [self addTextField:textField];
     }
-    
+    [self addCustomView];
     [self addBottomLine];
     
-    [self addTranslucentView];  //底部半透明蒙层
+//    [self addTranslucentView];  //底部半透明蒙层
     [self layoutActions];   //添加按钮
     [self.backScroll layoutIfNeeded];
     
@@ -161,7 +172,21 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin - self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom ) * .9;
-    self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50 ;
+    
+    if (self.customView && [self.customView isKindOfClass:[UIScrollView class]]) {
+        ((UIScrollView *)(self.customView)).scrollEnabled = NO;
+        if (self.customView.mas_height) {
+            [self.customView mas_updateConstraints:^(MASConstraintMaker *make) {
+                make.height.offset(((UIScrollView *)(self.customView)).contentSize.height);
+            }];
+        }else {
+            [self.customView mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.height.offset(((UIScrollView *)(self.customView)).contentSize.height);
+            }];
+        }
+    }
+    [self.backScroll layoutIfNeeded];
+    self.height = self.backScroll.contentSize.height + _buttonHeight > maxHeight ? maxHeight : self.backScroll.contentSize.height + _buttonHeight ;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -180,7 +205,7 @@
     [self.backgroundView addSubview:_backScroll];
     [_backScroll mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.top.offset(0);
-        make.bottom.offset(- 50);
+        make.bottom.offset(-_buttonHeight);
     }];
 }
 //MARK: topLine
@@ -188,7 +213,9 @@
     _topLine = [[UIView alloc] init];
     [self.backScroll addSubview:_topLine];
     [_topLine mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.top.height.offset(0.1);
+        make.height.offset(0.1);
+        make.left.right.offset(0);
+        make.top.offset(_topOffset);
         make.width.offset(self.width);
     }];
     _tempView = _topLine;
@@ -198,7 +225,9 @@
     _bottomLine = [[UIView alloc] init];
     [self.backScroll addSubview:_bottomLine];
     [_bottomLine mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.bottom.height.offset(0.1);
+        make.height.offset(0.1);
+        make.left.right.offset(0);
+        make.bottom.offset(-_bottomOffset);
         make.top.equalTo(self.tempView.mas_bottom).offset(15);
     }];
 }
@@ -216,7 +245,7 @@
     if (self.attributeTitle)  _titleLabel.attributedText = _attributeTitle;
     if (self.titleColor) _titleLabel.textColor = _titleColor;
     
-    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH *.7 - 40, MAXFLOAT)].height;
+    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake((WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right)*.7 - 40, MAXFLOAT)].height;
     [self.backScroll addSubview:_titleLabel];
     [_titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.offset(20);
@@ -232,6 +261,7 @@
     if (self.contentText.length == 0 && self.attributeContent.length == 0) return;
     
     _content = [[UITextView alloc] init];
+    _content.backgroundColor = [UIColor clearColor];
     _content.delegate = self;
     _content.editable = NO;
     _content.scrollEnabled = NO;
@@ -240,18 +270,31 @@
     if (self.attributeContent)  _content.attributedText = _attributeContent;
     
     //获取textView高度
-    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7 - 40, MAXFLOAT)].height;
-//    _content.textContainerInset = UIEdgeInsetsZero;
-//    _content.textContainer.lineFragmentPadding = 0;
+    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake((WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right)* .7 - 40, MAXFLOAT)].height;
 
     [self.backScroll addSubview:_content];
     [_content mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.offset(20);
         make.right.offset(-20);
-        make.top.equalTo(self.tempView.mas_bottom).offset(20);
+        make.top.equalTo(self.tempView.mas_bottom).offset(10);
         make.height.offset(contentHeight);
     }];
     _tempView = _content;
+}
+
+# pragma mark - 自定义视图
+- (void)addCustomView {
+    if (!self.customView) {
+        return;
+    }
+    [self.backScroll addSubview:self.customView];
+    [self.customView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.offset(20);
+        make.right.offset(-20);
+        make.top.equalTo(self.tempView.mas_bottom);
+    }];
+    
+    _tempView = self.customView;
 }
 
 - (void)addTextFieldWithConfigurationHandler:(void(^)(UITextField *textField))handler {
@@ -264,8 +307,10 @@
 
 - (void)addTextField:(UITextField *)textField {
     
-    textField.layer.borderColor = WD_color_gray(117).CGColor;
-    textField.layer.borderWidth = 1;
+    textField.layer.borderColor = WD_color_gray(200).CGColor;
+    textField.layer.borderWidth = 0.5;
+    textField.font = [UIFont systemFontOfSize:14];
+    
     [self.backScroll addSubview:textField];
     [textField mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.offset(20);
@@ -300,7 +345,6 @@
 - (void)layoutActions {
     
     UIView *backView = [[UIView alloc] init];
-    backView.backgroundColor = WD_color_gray(180);
     [self.backgroundView addSubview:backView];
     [backView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.offset(0);
@@ -308,7 +352,18 @@
     }];
     
     if (self.actions.count == 0) {
-    }else if (self.actions.count == 1) {
+        return;
+    }
+    
+    UIView *topLine = [[UIView alloc] init];
+    topLine.backgroundColor = WD_color_gray(221);
+    [backView addSubview:topLine];
+    [topLine mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.offset(0);
+        make.height.offset(0.5);
+    }];
+    
+    if (self.actions.count == 1) {
         UIButton *btn = [self creatBtnWithAction:self.actions[0] withTag:0];
         [backView addSubview:btn];
         [btn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -321,6 +376,17 @@
             UIButton *btn = [self creatBtnWithAction:self.actions[i] withTag:i];
             [actionBtnArr addObject:btn];
             [backView addSubview:btn];
+            
+            if (i < self.actions.count - 1) {
+                UIView *line = [[UIView alloc] init];
+                line.backgroundColor = WD_color_gray(221);
+                [backView addSubview:line];
+                [line mas_makeConstraints:^(MASConstraintMaker *make) {
+                    make.left.equalTo(btn.mas_right);
+                    make.top.bottom.equalTo(btn);
+                    make.width.offset(0.5);
+                }];
+            }
         }
         [actionBtnArr mas_makeConstraints:^(MASConstraintMaker *make) {
             make.bottom.offset(0);
@@ -334,7 +400,7 @@
 - (UIButton *)creatBtnWithAction:(WDAlertAction *)action withTag:(NSInteger)tag{
     
     UIButton *btn = [[UIButton alloc] init];
-    btn.backgroundColor = [UIColor whiteColor];
+    btn.backgroundColor = [UIColor clearColor];
     btn.tag = tag;
     [btn setTitle:action.title forState:UIControlStateNormal];
     [btn setTitleColor:action.titleColor forState:UIControlStateNormal];
@@ -361,6 +427,15 @@
 
 - (void)addActionWithTitle:(NSString *)title handler:(void (^)(WDAlertAction * _Nonnull))handler {
     [self.actions addObject:[WDAlertAction actionWithTitle:title handler:handler]];
+}
+
+- (void)addActionWithTitle:(NSString *)title font:(nullable UIFont *)font color:(nullable UIColor *)titleColor handler:(nullable void(^)(WDAlertAction *action))handler {
+    WDAlertAction *action = [[WDAlertAction alloc] init];
+    action.title = title;
+    if (font) action.font = font;
+    if (titleColor) action.titleColor = titleColor;
+    action.handler = handler;
+    [self.actions addObject:action];
 }
 
 # pragma mark - 设置富文本内容
@@ -409,7 +484,6 @@
     paragraphStyle.lineSpacing = _contentLineSpace;// 字体的行间距
     paragraphStyle.alignment = self.contentAlignment;
     [string addAttribute:NSParagraphStyleAttributeName value:paragraphStyle range:NSMakeRange(0, string.length)];
-    [string addAttribute:NSFontAttributeName value:_contentFont range:NSMakeRange(0, string.length)];
     _attributeContent = string;
     
 }
@@ -449,18 +523,31 @@
 - (void)updateViewSize {
     self.width = (WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .7;
     CGFloat maxHeight = (WD_SCREEN_HEIGHT - WD_SafeAreaTopBar - WD_SafeAreaBottomMargin - self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom ) * .9;
-    self.height = self.backScroll.contentSize.height + 50 > maxHeight ? maxHeight : self.backScroll.contentSize.height + 50;
+    if (self.customView && [self.customView isKindOfClass:[UIScrollView class]]) {
+        ((UIScrollView *)(self.customView)).scrollEnabled = NO;
+        if (self.customView.mas_height) {
+            [self.customView mas_updateConstraints:^(MASConstraintMaker *make) {
+                make.height.offset(((UIScrollView *)(self.customView)).contentSize.height);
+            }];
+        }else {
+            [self.customView mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.height.offset(((UIScrollView *)(self.customView)).contentSize.height);
+            }];
+        }
+    }
+    [self.backScroll layoutIfNeeded];
+    self.height = self.backScroll.contentSize.height + _buttonHeight > maxHeight ? maxHeight : self.backScroll.contentSize.height + _buttonHeight;
 }
 
 - (void)layoutSubviewsConstrain {
     [self.topLine mas_updateConstraints:^(MASConstraintMaker *make) {
         make.width.offset(self.width);
     }];
-    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH * .7 - 40, MAXFLOAT)].height;
+    CGFloat contentHeight = [_content sizeThatFits:CGSizeMake((WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right)* .7 - 40, MAXFLOAT)].height;
     [_content mas_updateConstraints:^(MASConstraintMaker *make) {
         make.height.offset(contentHeight);
     }];
-    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake(WD_SCREEN_WIDTH *.7 - 40, MAXFLOAT)].height;
+    CGFloat titleHeight = [_titleLabel sizeThatFits:CGSizeMake((WD_SCREEN_WIDTH - self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) *.7 - 40, MAXFLOAT)].height;
     [_titleLabel mas_updateConstraints:^(MASConstraintMaker *make) {
         make.height.offset(titleHeight);
     }];
@@ -597,7 +684,7 @@
 
 - (void)setDefaultValue{
     self.titleColor = [UIColor colorWithRed:17/255.0 green:17/255.0 blue:17/255.0 alpha:1];
-    self.font = [UIFont fontWithName:@"PingFangSC-Medium" size:17];
+    self.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:17];
 }
 
 @end

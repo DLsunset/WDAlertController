@@ -13,42 +13,68 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WDAlertController : UIViewController
 
+
+
+//**************标题***************
+
+
 /// 标题
 @property (nonatomic, copy) NSString *titleText;
-
-/// 正文
-@property (nonatomic, copy) NSString *contentText;
-
-/// 富文本标题
-@property (nonatomic, copy) NSAttributedString *attributeTitle;
-
-/// 富文本正文   若设置了contentText，则此项无效
-@property (nonatomic, copy) NSAttributedString *attributeContent;
 
 /// 标题颜色
 @property (nonatomic, strong) UIColor *titleColor;
 
-/// 标题字体
+/// 标题字体    默认 PingFangSC-Semibold  17
 @property (nonatomic, strong) UIFont *titleFont;
 
-/// 正文字体
+/// 富文本标题
+@property (nonatomic, copy) NSAttributedString *attributeTitle;
+
+
+
+//**************正文***************
+
+
+/// 正文
+@property (nonatomic, copy) NSString *contentText;
+
+/// 富文本正文   若设置了contentText，则此项无效
+@property (nonatomic, copy) NSAttributedString *attributeContent;
+
+/// 正文字体   默认  [UIFont systemFontOfSize:15]
 @property (nonatomic, strong) UIFont *contentFont;
 
-/// 正文颜色
+/// 正文颜色    默认
 @property (nonatomic, strong) UIColor *contentColor;
 
+/// 正文行间距，默认5。 这个会影响 attributeContent。
+@property (nonatomic, assign) CGFloat contentLineSpace;
+
+/// 默认 NSTextAlignmentLeft。这个会影响 attributeContent。
+@property (nonatomic, assign) NSTextAlignment contentAlignment;
+
+
+//**************自定义view ***************
+
+///可以和标题、正文共存，位置会在正文下面。customView需要有足够确定自身大小的约束,设置frame无效。
+@property (nonatomic, strong) UIView *customView;
+
+//**************其他设置 ***************
 
 /// 添加的textFields,如果没添加，则为nil
 @property (nonatomic, copy) NSArray *textFields;
 
-/// 正文行间距，默认5
-@property (nonatomic, assign) CGFloat contentLineSpace;
-
-/// 默认 NSTextAlignmentLeft
-@property (nonatomic, assign) NSTextAlignment contentAlignment;
-
-///按钮集合
+///按钮
 @property (nonatomic, strong) NSMutableArray <WDAlertAction *>*actions;
+
+///按钮高度  默认44
+@property (nonatomic, assign) CGFloat buttonHeight;
+
+///内容的额外上边距， 默认是0
+@property (nonatomic, assign) CGFloat topOffset;
+
+///内容的额外下边距， 默认是0. 想增大边距，则设为一个正值
+@property (nonatomic, assign) CGFloat bottomOffset;
 
 /// 点击背景蒙层dismiss，默认为NO
 @property (nonatomic, assign) BOOL tapDismissEnable;
@@ -61,6 +87,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 背景蒙版颜色， 默认黑色
 @property (nonatomic, strong) UIColor *dimViewColor;
+
+/**
+ 添加一个简单高斯模糊的背景，
+ */
+@property (nonatomic, assign) BOOL showBlurBackView;
 
 /// 用于设置弹窗展示区域不是整个屏幕时，应有的边距。
 @property (nonatomic, assign) UIEdgeInsets showAreaMarginInsets;
@@ -88,6 +119,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param handler 回调
 - (void)addActionWithTitle:(NSString *)title handler:(nullable void(^)(WDAlertAction *action))handler;
 
+- (void)addActionWithTitle:(NSString *)title font:(nullable UIFont *)font color:(nullable UIColor *)titleColor handler:(nullable void(^)(WDAlertAction *action))handler;
+
 - (void)addTextFieldWithConfigurationHandler:(void(^)(UITextField *textField))handler;
 
 /// 以presentController的形式，展示弹窗。
@@ -107,7 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// 标题
 @property (nonatomic, copy) NSString *title;
 
-/// 字体
+/// 字体 默认 PingFangSC-Semibold  17
 @property (nonatomic, strong) UIFont *font;
 
 /// 文字颜色

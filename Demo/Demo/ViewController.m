@@ -13,6 +13,7 @@
 
 @property (nonatomic, copy) NSArray *dataArr;
 
+
 @end
 
 @implementation ViewController
@@ -76,7 +77,6 @@
         
     } cancelAction:YES];
     alert.contentLineSpace = 8;
-//    alert.dimViewAlpha = 0;
     alert.actions.firstObject.titleColor = [UIColor blueColor];
     alert.contentAlignment = NSTextAlignmentCenter;
     [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
@@ -91,24 +91,53 @@
 
 //富文本标题，富文本内容
 - (void)showType2 {
-    NSAttributedString *title = [[NSAttributedString alloc] initWithString:@"一千年以后" attributes:@{NSForegroundColorAttributeName : [UIColor blueColor]}];
-    NSString *contentStr = @"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞";
-    NSMutableAttributedString *content = [[NSMutableAttributedString alloc] initWithString:contentStr attributes:@{NSForegroundColorAttributeName : [UIColor brownColor]}];
-    [content addAttributes:@{NSForegroundColorAttributeName : [UIColor redColor]} range:[contentStr rangeOfString:@"一千年以后"]];
-    [content addAttribute:NSLinkAttributeName value:@"privacy://" range:[contentStr rangeOfString:@"一千年以后"]];
+
+    NSString *contentStr = @"恭喜您已领先！\n此次出价为 RMB 200,000";
+    NSMutableAttributedString *content = [[NSMutableAttributedString alloc] initWithString:contentStr attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:13]}];
+    [content addAttributes:@{NSFontAttributeName : [UIFont fontWithName:@"PingFangSC-Semibold" size:13]} range:[contentStr rangeOfString:@"200,000"]];
     WDAlertController *alert = [[WDAlertController alloc] init];
-    alert.attributeTitle = title;
+    alert.titleText = @"出价成功";
+    alert.attributeContent = content;
+    alert.contentAlignment = NSTextAlignmentCenter;
+    alert.buttonHeight = 50;
+    alert.showBlurBackView = YES;
+//    UIView *view = [[UIView alloc] init];
+//    UILabel *subView = [[UILabel alloc] init];
+//    subView.text = @"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。\n别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞";
+//    subView.numberOfLines = 0;
+//
+//    [view addSubview:subView];
+//    [subView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.left.top.offset(0);
+//        make.right.bottom.offset(-0);
+//    }];
+//    [subView sizeToFit];
     
-    [alert addActionWithTitle:@"好听" handler:nil];
-    [alert setAttributeContent:content linkAction:^(NSString * _Nonnull url, NSRange range) {
-        NSLog(@"点击链接");
-    }];
+    UITableView *table = [[UITableView alloc] init];
+       [table registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cellid"];
+       table.delegate = self;
+       table.dataSource = self;
+    alert.customView = table;
+//    alert.showAreaMarginInsets = UIEdgeInsetsMake(0, 100, 0, 0);
+    
+    [alert addActionWithTitle:@"取消" font:[UIFont systemFontOfSize:17] color:[UIColor colorWithWhite:11/255.0 alpha:1] handler:nil];
+    [alert addActionWithTitle:@"确定" font:nil color:[UIColor colorWithRed:200/255.0 green:22/255.0 blue:30/255.0 alpha:1] handler:nil];
+//    [alert addActionWithTitle:@"测试" font:nil color:[UIColor colorWithRed:200/255.0 green:22/255.0 blue:30/255.0 alpha:1] handler:nil];
     [alert show];
 }
 
 //有标题，无内容
 - (void)showType3 {
-    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:nil actionName:@"好听" ActionHandle:nil cancelAction:YES];
+//    WDAlertController *alert = [WDAlertController alertWithTitle:@"一千年以后" content:nil actionName:@"好听" ActionHandle:nil cancelAction:YES];
+    
+    WDAlertController *alert = [[WDAlertController alloc] init];
+    alert.titleText = @"是否确认删除订单？";
+    alert.titleFont = [UIFont systemFontOfSize:18];
+    alert.titleColor = [UIColor colorWithWhite:17/255.0 alpha:1];
+    alert.topOffset = 20;
+    alert.bottomOffset = 20;
+    [alert addActionWithTitle:@"取消" font:[UIFont systemFontOfSize:17] color:[UIColor colorWithWhite:11/255.0 alpha:1] handler:nil];
+    [alert addActionWithTitle:@"确定" font:[UIFont fontWithName:@"PingFangSC-Medium" size:17] color:[UIColor colorWithRed:200/255.0 green:22/255.0 blue:30/255.0 alpha:1] handler:nil];
     [alert show];
 }
 
@@ -123,12 +152,9 @@
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"一千年以后" message:@"因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞,因为在一千年以后，世界早已没有我，无法深情挽着你的手，浅吻着你额头。别等到一千年以后，所有人的遗忘了我。那是红色黄昏的沙漠，能有谁解开缠绕千年的寂寞" preferredStyle:UIAlertControllerStyleAlert];
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"好听" style:UIAlertActionStyleDefault handler:nil];
-    [action setValue:[UIColor blackColor] forKey:@"_titleTextColor"];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.attributedPlaceholder = [[NSMutableAttributedString alloc] initWithString:@" " attributes:@{NSForegroundColorAttributeName : [UIColor brownColor]}];
-        textField.placeholder = @"一千年以后";
-    }];
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
     [alert addAction:action];
+    [alert addAction:action1];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self presentViewController:alert animated:YES completion:nil];
     });
