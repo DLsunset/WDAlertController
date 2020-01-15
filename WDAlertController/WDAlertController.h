@@ -54,12 +54,17 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) NSTextAlignment contentAlignment;
 
 
+
 //**************自定义view ***************
+
 
 ///可以和标题、正文共存，位置会在正文下面。customView需要有足够确定自身大小的约束,设置frame无效。
 @property (nonatomic, strong) UIView *customView;
 
+
+
 //**************其他设置 ***************
+
 
 /// 添加的textFields,如果没添加，则为nil
 @property (nonatomic, copy) NSArray *textFields;
@@ -88,13 +93,13 @@ NS_ASSUME_NONNULL_BEGIN
 /// 背景蒙版颜色， 默认黑色
 @property (nonatomic, strong) UIColor *dimViewColor;
 
-/**
- 添加一个简单高斯模糊的背景，
- */
+/// 添加一个简单高斯模糊的背景，默认为NO
 @property (nonatomic, assign) BOOL showBlurBackView;
 
 /// 用于设置弹窗展示区域不是整个屏幕时，应有的边距。
 @property (nonatomic, assign) UIEdgeInsets showAreaMarginInsets;
+
+
 
 /// 构造方法，传入标题、内容、操作按钮
 /// @param title 标题
