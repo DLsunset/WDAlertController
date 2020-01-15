@@ -11,3 +11,6 @@
 * 标题、内容、自定义view、textField、按钮，按需展示。
 
 
+支持cocoapods
+
+     pod 'WDAlertController'
