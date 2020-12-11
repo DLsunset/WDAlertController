@@ -561,7 +561,7 @@
 
 - (void)updateLayout {
     [self updateViewSize];
-    [self.view mas_remakeConstraints:^(MASConstraintMaker *make) {
+    [self.view mas_updateConstraints:^(MASConstraintMaker *make) {
         make.centerY.offset((self.showAreaMarginInsets.top - self.showAreaMarginInsets.bottom) * .5);
         make.centerX.offset((self.showAreaMarginInsets.left - self.showAreaMarginInsets.right) * .5);
         make.width.offset(self.width);
@@ -572,6 +572,10 @@
         [self.view.superview layoutIfNeeded];
     }];
     
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskLandscapeRight;
 }
 
 # pragma mark - WDKeyboardDelegate

@@ -21,17 +21,114 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    UITableView *table = [[UITableView alloc] init];
-    [table registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cellid"];
-    table.delegate = self;
-    table.dataSource = self;
-    [self.view addSubview:table];
-    [table mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.edges.offset(0);
+//    UITableView *table = [[UITableView alloc] init];
+//    [table registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cellid"];
+//    table.delegate = self;
+//    table.dataSource = self;
+//    [self.view addSubview:table];
+//    [table mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.edges.offset(0);
+//    }];
+//
+//    self.dataArr = @[@"普通标题，普通内容",@"富文本标题，富文本内容",@"有标题，无内容",@"无标题，有内容",@"系统"];
+//    [self start:0 end:0];
+    [self test1];
+}
+
+
+- (void)test1 {
+    
+    UIView *backView = [[UIView alloc] init];
+    backView.backgroundColor = UIColor.lightGrayColor;
+    [self.view addSubview:backView];
+    [backView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.offset(0);
+        make.top.offset(200);
     }];
     
-    self.dataArr = @[@"普通标题，普通内容",@"富文本标题，富文本内容",@"有标题，无内容",@"无标题，有内容",@"系统"];
+    UIImageView *image = [[UIImageView alloc] init];
+    image.backgroundColor = UIColor.darkGrayColor;
+    [backView addSubview:image];
+    [image mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.offset(0);
+        make.left.offset(10);
+        make.width.offset(70);
+        make.height.offset(60);
+    }];
+    
+    UILabel *title = [[UILabel alloc] init];
+    title.numberOfLines = 0;
+    title.textColor = UIColor.whiteColor;
+    title.text = @"我是标题我是标题我是标题我是标题我是标题我是标题我是标题我是标题我是标题我是标题";
+    [backView addSubview:title];
+    [title mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(image.mas_right).offset(5);
+        make.right.offset(-10);
+        make.top.offset(5);
+    }];
+    
+    UILabel *timeTitle = [[UILabel alloc] init];
+    timeTitle.numberOfLines = 0;
+    timeTitle.textColor = UIColor.whiteColor;
+    timeTitle.text = @"拍卖时间:";
+    [backView addSubview:timeTitle];
+    [timeTitle mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(image.mas_right).offset(5);
+        make.top.equalTo(title.mas_bottom).offset(5);
+        make.width.offset(80);
+    }];
+    
+    UILabel *time = [[UILabel alloc] init];
+    time.numberOfLines = 0;
+    time.textColor = UIColor.whiteColor;
+    time.text = @"2020年9月25日 17:40:29";
+    [backView addSubview:time];
+    [time mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(timeTitle.mas_right).offset(5);
+        make.right.offset(-10);
+        make.top.equalTo(title.mas_bottom).offset(5);
+    }];
+    
+    UILabel *addressTitle = [[UILabel alloc] init];
+    addressTitle.numberOfLines = 0;
+    addressTitle.textColor = UIColor.whiteColor;
+    addressTitle.text = @"拍卖地址:";
+    [backView addSubview:addressTitle];
+    [addressTitle mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(image.mas_right).offset(5);
+        make.top.equalTo(time.mas_bottom).offset(5);
+        make.width.offset(80);
+    }];
+    
+    UILabel *address = [[UILabel alloc] init];
+    address.numberOfLines = 0;
+    address.textColor = UIColor.whiteColor;
+    address.text = @"我是地址我是地址我是地址我是地址我是地址我是地址我是地址我是地址我是地址我是地址我是地址我是地址";
+    [backView addSubview:address];
+    [address mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(addressTitle.mas_right).offset(5);
+        make.right.offset(-10);
+        make.top.equalTo(time.mas_bottom).offset(5);
+        make.bottom.offset(-5);
+    }];
+    
+    [address setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
 }
+
+
+
+- (void)start:(NSInteger)start end:(NSInteger)end {
+    NSInteger countDownSecond = 7200;
+    int second = (int)countDownSecond  % 60;
+    int minute = ((int)countDownSecond / 60) % 60;
+    int hours = (int)countDownSecond / (60 *60) % 24;
+    int days = (int)countDownSecond / (60 *60) / 24;
+    
+    NSLog(@"%d天 %d时 %d分 %d秒",days,hours,minute,second);
+    
+}
+
+
 
 # pragma mark - tableView delegate  datasource 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
